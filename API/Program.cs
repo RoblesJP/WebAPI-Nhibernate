@@ -19,6 +19,8 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddSingleton<SessionConfiguration>();
 builder.Services.AddScoped(x => x.GetService<SessionConfiguration>().OpenSession());
 
+builder.Services.Configure<ConnectionStringsOptions>(builder.Configuration.GetSection(ConnectionStringsOptions.Section));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

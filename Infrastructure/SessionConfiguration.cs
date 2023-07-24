@@ -5,6 +5,7 @@ using NHibernate.Dialect;
 using NHibernate.Driver;
 using Domain.Categories;
 using Infrastructure.Mappings;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Session
 {
@@ -12,9 +13,12 @@ namespace Infrastructure.Session
     {
         public Configuration Configuration { get; }
         public ISessionFactory SessionFactory { get; }
+        private ConnectionStringsOptions _connectionStringsOptions;
 
-        public SessionConfiguration()
+        public SessionConfiguration(IOptions<ConnectionStringsOptions> options)
         {
+            _connectionStringsOptions = options.Value;
+
             ModelMapper mapper = new ModelMapper();
             mapper.AddMapping<CategoryMap>();
             var domainMapping = mapper.CompileMappingForAllExplicitlyAddedEntities();
@@ -22,7 +26,7 @@ namespace Infrastructure.Session
             Configuration = new Configuration();
             Configuration.DataBaseIntegration(db =>
             {
-                db.ConnectionString = @"User Id=postgres;Password=tTclAc4Yp4aiX3W2;Server=db.fviojeyqghomrbvdfcnp.supabase.co;Port=5432;Database=postgres";
+                db.ConnectionString = _connectionStringsOptions.Supabase;
                 db.Dialect<PostgreSQLDialect>();
                 db.Driver<NpgsqlDriver>();
             });
@@ -36,5 +40,12 @@ namespace Infrastructure.Session
         {
             return SessionFactory.OpenSession();
         }
+    }
+
+    public class ConnectionStringsOptions
+    {
+        public const string Section = "ConnectionStrings";
+
+        public string Supabase { get; set; } = String.Empty;
     }
 }
